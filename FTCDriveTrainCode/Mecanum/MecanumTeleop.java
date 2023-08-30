@@ -9,13 +9,14 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
 
-@TeleOp(name="MecanumTeleopTest", group="Iterative Opmode")
-public class MecanumTeleopTest extends OpMode
+@TeleOp(name="'swerve'", group="Iterative Opmode")
+public class MecanumTeleop extends OpMode
 {
-    private MecanumDriverTest driver = new MecanumDriverTest();
+    private MecanumDriver driver = new MecanumDriver();
     double forward;
     double strafe;
     double turn;
+    boolean fieldOriented = true;
     
     //init hardware map from XHardwareMap
     @Override
@@ -34,11 +35,24 @@ public class MecanumTeleopTest extends OpMode
     @Override
     public void loop() {
         
+        if(gamepad1.x){
+            fieldOriented = true;
+        }
+        if(gamepad1.y){
+            fieldOriented = false;
+        }
+        
         forward = gamepad1.left_stick_y;
         strafe = gamepad1.left_stick_x;
         turn = gamepad1.right_stick_x;
 
         driver.drive(forward, strafe, turn);
+        
+        if(gamepad1.a || fieldOriented == false){
+            driver.resetIMU();
+        }
+        
+        telemetry.addData("field oriented",fieldOriented);
         
     }
 

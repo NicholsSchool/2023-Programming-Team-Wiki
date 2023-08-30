@@ -14,12 +14,14 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 
 
-public class MecanumDriverTest{
+
+public class MecanumDriver{
     //declaring variables, for tweaking use sensitivity and top speed
     public DcMotor frontLeftMotor , frontRightMotor, backLeftMotor, backRightMotor;
     public BNO055IMU imu;
     double positionPower = 0.7;
     double heading;
+    float IMURESET = 0;
 
     HardwareMap hwMap = null;
 
@@ -56,9 +58,11 @@ public class MecanumDriverTest{
         
 
     } 
+        
+        
         public void drive(double forward, double strafe, double turn){
             
-            heading = imu.getAngularOrientation().firstAngle;
+            heading = imu.getAngularOrientation().firstAngle - IMURESET;
             
             double leftPowerF = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe - turn;
             double leftPowerB = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe - turn;
@@ -73,6 +77,11 @@ public class MecanumDriverTest{
         public float getHeading(){   
         return imu.getAngularOrientation().firstAngle;
     }
+    
+        public void resetIMU(){
+            IMURESET = imu.getAngularOrientation().firstAngle;
+        } 
+    
         
 }
         
