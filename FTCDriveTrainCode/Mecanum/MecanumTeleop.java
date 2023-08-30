@@ -7,13 +7,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 
-@TeleOp(name="MecanumTeleop", group="Iterative Opmode")
-public class MecanumTeleop extends OpMode
+@TeleOp(name="MecanumTeleopTest", group="Iterative Opmode")
+public class MecanumTeleopTest extends OpMode
 {
-    private MecanumDriver driver = new MecanumDriver();
+    private MecanumDriverTest driver = new MecanumDriverTest();
     double forward;
     double strafe;
     double turn;
@@ -40,10 +39,15 @@ public class MecanumTeleop extends OpMode
         turn = gamepad1.right_stick_x;
 
         driver.drive(forward, strafe, turn);
-
+        
+    }
 
     @Override
     public void stop() {
     }
-
+    
+    
 }
+
+
+    
