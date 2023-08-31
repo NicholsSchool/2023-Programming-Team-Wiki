@@ -12,10 +12,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.concurrent.TimeUnit;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 
-public class MecanumDriver{
+public class MecanumDriverTest{
     //declaring variables, for tweaking use sensitivity and top speed
     public DcMotor frontLeftMotor , frontRightMotor, backLeftMotor, backRightMotor;
     public BNO055IMU imu;
@@ -58,9 +59,17 @@ public class MecanumDriver{
         
 
     } 
+    
+    public float getHeading(){   
+        return imu.getAngularOrientation().firstAngle;
+    }
         
         
-        public void drive(double forward, double strafe, double turn){
+        public void drive(double forward, double strafe, double turn, boolean autoAlign, double desiredAngle){
+            
+            if(autoAlign){
+                turn = 10 * headingCorrect(desiredAngle);
+            }
             
             heading = imu.getAngularOrientation().firstAngle - IMURESET;
             
@@ -74,9 +83,24 @@ public class MecanumDriver{
             backRightMotor.setPower(rightPowerB);
         }
         
-        public float getHeading(){   
-        return imu.getAngularOrientation().firstAngle;
-    }
+        
+        public double headingCorrect(double desiredAngle){
+            double difference = desiredAngle - getHeading();
+            if(difference < -180.0){
+                difference += 360.0;
+            }else if (difference >= 180){
+                difference -= 360.0;
+            }
+            
+            if(Math.abs(difference) < 0.3)
+                return 0.0;
+            else if( difference >= 0.0){
+                return -0.7 * Math.pow(Math.sin(Math.toRadians(0.5 * difference)),3.0/5);
+            }else{
+                return 0.7 * Math.pow(Math.sin(Math.toRadians(0.5 * difference - 180.0)),3.0/5);
+            }
+        }
+        
     
         public void resetIMU(){
             IMURESET = imu.getAngularOrientation().firstAngle;
