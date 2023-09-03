@@ -18,13 +18,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 public class MecanumDriverTest{
     //declaring variables, for tweaking use sensitivity and top speed
-    public DcMotor frontLeftMotor , frontRightMotor, backLeftMotor, backRightMotor;
-    public BNO055IMU imu;
-    double positionPower = 0.7;
-    double heading;
-    float IMURESET = 0;
+    public  DcMotor frontLeftMotor , frontRightMotor, backLeftMotor, backRightMotor;
+    public  BNO055IMU imu;
+            double heading;
+            float IMURESET = 0;
 
-    HardwareMap hwMap = null;
+            HardwareMap hwMap = null;
 
     private ElapsedTime runtime = new ElapsedTime();
     
@@ -67,36 +66,37 @@ public class MecanumDriverTest{
     }
         
         
-        public void drive(double forward, double strafe, double turn, float autoCorrect){
-            
-            heading = (imu.getAngularOrientation().firstAngle - IMURESET) * Math.PI / 180;
-            
-            double leftPowerF = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe - turn;
-            double leftPowerB = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe - turn;
-            double rightPowerF = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe + turn;
-            double rightPowerB = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe + turn;
-            frontLeftMotor.setPower(leftPowerF);
-            frontRightMotor.setPower(rightPowerF);
-            backLeftMotor.setPower(leftPowerB);
-            backRightMotor.setPower(rightPowerB);
+    public void drive(double forward, double strafe, double turn){
+        
+        heading = (imu.getAngularOrientation().firstAngle - IMURESET) * Math.PI / 180;
+        
+        double leftPowerF = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe - turn;
+        double leftPowerB = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe - turn;
+        double rightPowerF = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe + turn;
+        double rightPowerB = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe + turn;
+        frontLeftMotor.setPower(leftPowerF);
+        frontRightMotor.setPower(rightPowerF);
+        backLeftMotor.setPower(leftPowerB);
+        backRightMotor.setPower(rightPowerB);
+    }// drive
+
+    public void resetIMU(){
+        IMURESET = imu.getAngularOrientation().firstAngle;
+    }// resetIMU
+
+    public float autoCorrect(double turn, float heading){
+        float desiredAngle;
+        float difference;
+
+        if(turn != 0){
+            desiredAngle = heading;
         }
 
-        public void resetIMU(){
-            IMURESET = imu.getAngularOrientation().firstAngle;
-        } 
+        difference = desiredAngle - heading;
+        return Math.atan(10 * difference) / 2;
 
-        public float autoCorrect(double turn, float heading){
-            float desiredAngle;
-            float difference;
+    }// autocorrect
 
-            if(turn != 0){
-                desiredAngle = heading;
-            }
-
-            difference = desiredAngle - heading;
-            return Math.atan(10 * difference) / 2;
-
-        }
     
         
 }

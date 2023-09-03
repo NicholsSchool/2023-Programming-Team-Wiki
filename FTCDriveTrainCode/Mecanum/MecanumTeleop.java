@@ -53,7 +53,7 @@ public class MecanumTeleopTest extends OpMode
         
         forward = gamepad1.left_stick_y;
         strafe = gamepad1.left_stick_x;
-        turn = gamepad1.right_stick_x;
+        turn = gamepad1.right_stick_x + driver.autoCorrect(turn, driver.getHeading());
         
         driver.drive(forward, strafe, turn);
         
