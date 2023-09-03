@@ -60,20 +60,20 @@ public class MecanumDriverTest{
     } 
     
     public float getHeading(){   
-        float HEADING = (imu.getAngularOrientation().firstAngle - IMURESET) * Math.PI / 180;
+        float heading = (imu.getAngularOrientation().firstAngle - IMURESET) * Math.PI / 180;
 
-        return HEADING;
+        return heading;
     }
         
         
-    public void drive(double forward, double strafe, double turn){
+    public void drive(double forward, double strafe, double turn, float autoCorrect){
         
         heading = (imu.getAngularOrientation().firstAngle - IMURESET) * Math.PI / 180;
         
-        double leftPowerF = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe - turn;
-        double leftPowerB = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe - turn;
-        double rightPowerF = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe + turn;
-        double rightPowerB = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe + turn;
+        double leftPowerF = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe - (turn + autoCorrect);
+        double leftPowerB = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe - (turn + autoCorrect);
+        double rightPowerF = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe + (turn + autoCorrect);
+        double rightPowerB = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe + (turn + autoCorrect);
         frontLeftMotor.setPower(leftPowerF);
         frontRightMotor.setPower(rightPowerF);
         backLeftMotor.setPower(leftPowerB);
@@ -84,16 +84,17 @@ public class MecanumDriverTest{
         IMURESET = imu.getAngularOrientation().firstAngle;
     }// resetIMU
 
-    public float autoCorrect(double turn, float heading){
+    public double autoCorrect(double turn){
         float desiredAngle;
         float difference;
+        float heading = (imu.getAngularOrientation().firstAngle - IMURESET) * Math.PI / 180;
 
         if(turn != 0){
             desiredAngle = heading;
         }
 
         difference = desiredAngle - heading;
-        return Math.atan(10 * difference) / 2;
+        return (double)Math.atan(10 * difference) / 2;
 
     }// autocorrect
 
