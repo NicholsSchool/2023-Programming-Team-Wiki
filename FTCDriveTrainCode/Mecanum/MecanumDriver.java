@@ -61,17 +61,15 @@ public class MecanumDriverTest{
     } 
     
     public float getHeading(){   
-        return imu.getAngularOrientation().firstAngle;
+        float HEADING = (imu.getAngularOrientation().firstAngle - IMURESET) * Math.PI / 180;
+
+        return HEADING;
     }
         
         
-        public void drive(double forward, double strafe, double turn, boolean autoAlign, double desiredAngle){
+        public void drive(double forward, double strafe, double turn, float autoCorrect){
             
-            if(autoAlign){
-                turn = 10 * headingCorrect(desiredAngle);
-            }
-            
-            heading = imu.getAngularOrientation().firstAngle - IMURESET;
+            heading = (imu.getAngularOrientation().firstAngle - IMURESET) * Math.PI / 180;
             
             double leftPowerF = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe - turn;
             double leftPowerB = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe - turn;
@@ -82,29 +80,23 @@ public class MecanumDriverTest{
             backLeftMotor.setPower(leftPowerB);
             backRightMotor.setPower(rightPowerB);
         }
-        
-        
-        public double headingCorrect(double desiredAngle){
-            double difference = desiredAngle - getHeading();
-            if(difference < -180.0){
-                difference += 360.0;
-            }else if (difference >= 180){
-                difference -= 360.0;
-            }
-            
-            if(Math.abs(difference) < 0.3)
-                return 0.0;
-            else if( difference >= 0.0){
-                return -0.7 * Math.pow(Math.sin(Math.toRadians(0.5 * difference)),3.0/5);
-            }else{
-                return 0.7 * Math.pow(Math.sin(Math.toRadians(0.5 * difference - 180.0)),3.0/5);
-            }
-        }
-        
-    
+
         public void resetIMU(){
             IMURESET = imu.getAngularOrientation().firstAngle;
         } 
+
+        public float autoCorrect(double turn, float heading){
+            float desiredAngle;
+            float difference;
+
+            if(turn != 0){
+                desiredAngle = heading;
+            }
+
+            difference = desiredAngle - heading;
+            return Math.atan(10 * difference) / 2;
+
+        }
     
         
 }
