@@ -44,10 +44,10 @@ public class MecanumTeleopTest extends OpMode
     public void loop() {
         
         
-        if(gamepad1.x){
+        if(gamepad1.dpad_up){
             fieldOriented = true;
         }
-        if(gamepad1.y){
+        if(gamepad1.dpad_down){
             fieldOriented = false;
         }
         

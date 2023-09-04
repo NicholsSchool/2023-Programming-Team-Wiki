@@ -95,6 +95,7 @@ public class MecanumDriverTest{
 
         difference = desiredAngle - heading;
         return (double)Range.clip((Math.pow(Math.atan(difference),3)+ Math.sin(0.5 * difference)) / 3,-0.7,0.7);
+        
 
     }// autocorrect
 
