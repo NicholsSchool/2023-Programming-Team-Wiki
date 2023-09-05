@@ -57,12 +57,10 @@ public class MecanumTeleopTest extends OpMode
         
         driver.drive(forward, strafe, turn, driver.autoCorrect(turn));
         
-        if(gamepad1.a || fieldOriented == false){
-            driver.resetIMU();
-        }
         
         telemetry.addData("field oriented",fieldOriented);
-        
+        telemetry.addData("angle",driver.getHeading() * 180 / Math.PI);
+        telemetry.addData("autocorrect",driver.autoCorrect(turn));
     
     }
 
