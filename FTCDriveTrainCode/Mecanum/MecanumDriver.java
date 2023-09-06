@@ -14,21 +14,14 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-
-
 public class MecanumDriverTest{
     // Declare OpMode members as well as field orienting variables.
     public  DcMotor frontLeftMotor , frontRightMotor, backLeftMotor, backRightMotor;
     public  BNO055IMU imu;
-            double heading = (imu.getAngularOrientation().firstAngle - IMURESET);
+            double heading;
             float IMURESET = 0;
             float desiredAngle;
-            
-            // FO1 and FO2 are for field orienting
-            float FO1 = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1)
-            float FO2 = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1)
-            
-
+        
             HardwareMap hwMap = null;
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -64,12 +57,17 @@ public class MecanumDriverTest{
 
     } 
 
+    
     public float getHeading() {
-        return (float) heading;
+        return (float) imu.getAngularOrientation().firstAngle - IMURESET;
     }//heading 
         
     public void drive(double forward, double strafe, double turn, float turnCorrection) {
-
+        heading = imu.getAngularOrientation().firstAngle - IMURESET;
+        // FO1 and FO2 are for field orienting
+        double FO1 = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1);
+        double FO2 = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1);
+        
         double leftPowerF = FO1 * (forward) - FO2 * strafe - (turn + turnCorrection);
         double leftPowerB = FO2 * (forward) + FO1 * strafe - (turn + turnCorrection);
         double rightPowerF = FO2 * (forward) + FO1 * strafe + (turn + turnCorrection);
@@ -81,20 +79,22 @@ public class MecanumDriverTest{
         backRightMotor.setPower(rightPowerB);
     }// drive
 
-    public float easing(difference){
+    public float easing(float difference){
         //Using logistic growth for easing
-        float easing = 2 * (1/(1 + Math.pow(Math.E, -1 * difference)) - 0.5)
+        float easing = (float) ( 2 * (1/(1 + Math.pow(Math.E, -1.2 * difference)) - 0.5));
         return easing;
     }// easing
 
     public float turnCorrection(float desiredAngleInput) {
-        float difference = desiredAngleInput - heading;
+        
+        heading = imu.getAngularOrientation().firstAngle - IMURESET;
+        float difference = desiredAngleInput - getHeading();
         
         //creates shortest path of correction
-        if(Math.abs(difference > Math.PI || difference < - Math.PI)) {
-            return -1 * easing(difference);
-    }else{
-        return easing(difference);
+        if(Math.abs(difference) > Math.PI) {
+            return easing(difference);
+        }else{
+        return -1 * easing(difference);
     }
     }//turnCorrection
         

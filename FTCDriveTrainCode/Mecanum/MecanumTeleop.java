@@ -51,28 +51,31 @@ public class MecanumTeleopTest extends OpMode{
         
         //set quadrant angles to follow
         if(gamepad1.a){
-            desiredAngle = Math.PI;
+            desiredAngle = (float) Math.PI;
         }else if(gamepad1.b){
-            desiredAngle = - Math.PI / 2;
+            desiredAngle = (float) - Math.PI / 2;
         }else if(gamepad1.x){
-            desiredAngle = Math.PI / 2;
+            desiredAngle = (float) Math.PI / 2;
         }else if(gamepad1.y){
-            desiredAngle = 0;
+            desiredAngle = (float) 0;
         }
 
         //turn correction doesn't interfere with intentional turning
-        if(turn != 0){
-            desiredAngle = driver.getHeading();
+        if(turn > 0){
+            desiredAngle = (float) (driver.getHeading() - 0.5);
+        }else if (turn < 0){
+            desiredAngle = (float) (driver.getHeading() + 0.5);
         }
 
         //drive method
         driver.drive(forward, strafe, turn, driver.turnCorrection(desiredAngle));
         
         
-        telemetry.addData("field oriented",fieldOriented);
         telemetry.addData("angle",driver.getHeading() * 180 / Math.PI);
-        telemetry.addData("autocorrect",driver.autoCorrect(turn));
-    
+        telemetry.addData("desired angle",desiredAngle * 180 / Math.PI);
+        telemetry.addData("turn correction",driver.turnCorrection(desiredAngle));
+        telemetry.addData("difference", desiredAngle - driver.getHeading());
+        telemetry.addData("turn", turn);
     }
 
     @Override
