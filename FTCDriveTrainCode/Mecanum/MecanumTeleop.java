@@ -10,17 +10,18 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
 
 @TeleOp(name="'swerve'", group="Iterative Opmode")
-public class MecanumTeleopTest extends OpMode
-{
+public class MecanumTeleopTest extends OpMode{
+
+    //create instances and variables for movement
     private MecanumDriverTest driver = new MecanumDriverTest();
     private ElapsedTime runtime = new ElapsedTime();
     double forward;
     double strafe;
     double turn;
-    boolean fieldOriented = true;
+    float desiredAngle = 0;
     
     
-    //init hardware map from XHardwareMap
+    //init hardware map
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
@@ -43,19 +44,29 @@ public class MecanumTeleopTest extends OpMode
     @Override
     public void loop() {
         
-        
-        if(gamepad1.dpad_up){
-            fieldOriented = true;
-        }
-        if(gamepad1.dpad_down){
-            fieldOriented = false;
-        }
-        
+        //assign movement variables
         forward = gamepad1.left_stick_y;
         strafe = gamepad1.left_stick_x;
         turn = gamepad1.right_stick_x;
         
-        driver.drive(forward, strafe, turn, driver.autoCorrect(turn));
+        //set quadrant angles to follow
+        if(gamepad1.a){
+            desiredAngle = Math.PI;
+        }else if(gamepad1.b){
+            desiredAngle = - Math.PI / 2;
+        }else if(gamepad1.x){
+            desiredAngle = Math.PI / 2;
+        }else if(gamepad1.y){
+            desiredAngle = 0;
+        }
+
+        //turn correction doesn't interfere with intentional turning
+        if(turn != 0){
+            desiredAngle = driver.getHeading();
+        }
+
+        //drive method
+        driver.drive(forward, strafe, turn, driver.turnCorrection(desiredAngle));
         
         
         telemetry.addData("field oriented",fieldOriented);
