@@ -17,20 +17,23 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 public class MecanumDriverTest{
-    //declaring variables, for tweaking use sensitivity and top speed
+    // Declare OpMode members as well as field orienting variables.
     public  DcMotor frontLeftMotor , frontRightMotor, backLeftMotor, backRightMotor;
     public  BNO055IMU imu;
-            double heading;
+            double heading = (imu.getAngularOrientation().firstAngle - IMURESET);
             float IMURESET = 0;
-            float desiredAngle = 0;
+            float desiredAngle;
+            
+            // FO1 and FO2 are for field orienting
+            float FO1 = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1)
+            float FO2 = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1)
             
 
             HardwareMap hwMap = null;
 
     private ElapsedTime runtime = new ElapsedTime();
     
-    public void init( HardwareMap ahwMap ) 
-    {
+    public void init( HardwareMap ahwMap ){
         // Save reference to Hardware map
         HardwareMap hwMap = ahwMap;  
         
@@ -41,7 +44,7 @@ public class MecanumDriverTest{
         imu = hwMap.get( BNO055IMU.class, "IMU" );
         imu.initialize( parameters );
         
-        
+        //set up motors
         frontLeftMotor  = hwMap.get(DcMotor.class, "leftMotorF");
         frontRightMotor  = hwMap.get(DcMotor.class, "rightMotorF");
         backLeftMotor = hwMap.get(DcMotor.class, "leftMotorB");
@@ -60,46 +63,40 @@ public class MecanumDriverTest{
         
 
     } 
-    
-    public float getHeading(){   
-        double heading = (imu.getAngularOrientation().firstAngle - IMURESET);
 
-        return (float)heading;
-    }
+    public float getHeading() {
+        return (float) heading;
+    }//heading 
         
+    public void drive(double forward, double strafe, double turn, float turnCorrection) {
+
+        double leftPowerF = FO1 * (forward) - FO2 * strafe - (turn + turnCorrection);
+        double leftPowerB = FO2 * (forward) + FO1 * strafe - (turn + turnCorrection);
+        double rightPowerF = FO2 * (forward) + FO1 * strafe + (turn + turnCorrection);
+        double rightPowerB = FO1 * (forward) - FO2 * strafe + (turn + turnCorrection);
         
-    public void drive(double forward, double strafe, double turn, double autoCorrectVar){
-        
-        heading = (imu.getAngularOrientation().firstAngle - IMURESET);
-        
-        double leftPowerF = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe - (turn + autoCorrectVar);
-        double leftPowerB = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe - (turn + autoCorrectVar);
-        double rightPowerF = Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * (forward) + Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * strafe + (turn + autoCorrectVar);
-        double rightPowerB = Range.clip((Math.cos(heading) + Math.sin(heading)),-1,1) * (forward) - Range.clip((Math.cos(heading) - Math.sin(heading)),-1,1) * strafe + (turn + autoCorrectVar);
         frontLeftMotor.setPower(leftPowerF);
         frontRightMotor.setPower(rightPowerF);
         backLeftMotor.setPower(leftPowerB);
         backRightMotor.setPower(rightPowerB);
     }// drive
 
-    
-    public double autoCorrect(double turn){
-        float difference;
-        float heading = (imu.getAngularOrientation().firstAngle - IMURESET);
+    public float easing(difference){
+        //Using logistic growth for easing
+        float easing = 2 * (1/(1 + Math.pow(Math.E, -1 * difference)) - 0.5)
+        return easing;
+    }// easing
 
-        if(turn != 0){
-            desiredAngle = heading;
-        }
-
-        difference = desiredAngle - heading;
-        return (-1 / Math.PI) * difference;
+    public float turnCorrection(float desiredAngleInput) {
+        float difference = desiredAngleInput - heading;
         
-
-    }// autocorrect
-
-    
-
-    
+        //creates shortest path of correction
+        if(Math.abs(difference > Math.PI || difference < - Math.PI)) {
+            return -1 * easing(difference);
+    }else{
+        return easing(difference);
+    }
+    }//turnCorrection
         
 }
         
