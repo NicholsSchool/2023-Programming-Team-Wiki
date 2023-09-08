@@ -40,6 +40,11 @@ public class XDriver{
         greenMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         blueMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        yellowMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        redMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        greenMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        blueMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
     } 
         public void drive(double forward, double strafe, double turn){
             

@@ -9,11 +9,17 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
-@TeleOp(name="TankTeleop", group="Iterative Opmode")
-public class TankTeleop extends OpMode
+
+@TeleOp(name="XTeleop", group="Iterative Opmode")
+public class XTeleop extends OpMode
 {
-    private TankDriver driver = new TankDriver();
+    // Declare OpMode members
+    //make instances of elapsed time for acceleration and power up
+    //also bring hardware map from XHardwareMap
+
+    private XDriver driver = new XDriver();
     double forward;
+    double strafe;
     double turn;
     
     //init hardware map from XHardwareMap
@@ -34,11 +40,12 @@ public class TankTeleop extends OpMode
     public void loop() {
         
         forward = gamepad1.left_stick_y;
+        strafe = gamepad1.left_stick_x;
         turn = gamepad1.right_stick_x;
 
-        driver.drive(forward, turn);
+        driver.drive(forward, strafe, turn);
 
-
+    }
     @Override
     public void stop() {
     }

@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.Range;
 
 public class HDriver{
     //declaring variables, for tweaking use sensitivity and top speed
-    public DcMotor leftMotor, rightMotor;
+    public DcMotor leftMotor, rightMotor, hMotor;
 
     double positionPower = 0.7;
 
@@ -23,9 +23,9 @@ public class HDriver{
         // Save reference to Hardware map
         HardwareMap hwMap = ahwMap;  
         
-        leftMotor  = hwMap.get(DcMotor.class, "leftMotor");
-        rightMotor  = hwMap.get(DcMotor.class, "rightMotor");
-        hMotor  = hwMap.get(DcMotor.class, "hMotor");
+        leftMotor = hwMap.get(DcMotor.class, "leftMotor");
+        rightMotor = hwMap.get(DcMotor.class, "rightMotor");
+        hMotor = hwMap.get(DcMotor.class, "hMotor");
         
         leftMotor.setDirection(DcMotor.Direction.FORWARD);
         rightMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -34,6 +34,10 @@ public class HDriver{
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         hMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        hMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     } 
         public void drive(double forward, double strafe, double turn){
             leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -54,7 +58,7 @@ public class HDriver{
             rightMotor.setTargetPosition(h);
 
             leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            redMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            hMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             hMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             leftMotor.setPower(positionPower);

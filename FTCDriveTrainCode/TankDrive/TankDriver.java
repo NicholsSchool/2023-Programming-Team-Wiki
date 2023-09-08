@@ -47,7 +47,7 @@ public class TankDriver{
             rightMotor.setTargetPosition(right);
 
             leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            redMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             leftMotor.setPower(positionPower);
             rightMotor.setPower(positionPower);
