@@ -18,8 +18,8 @@ public class XTeleop extends OpMode
     //also bring hardware map from XHardwareMap
 
     private XDriver driver = new XDriver();
-    double forward;
-    double strafe;
+    double angle;
+    double power;
     double turn;
     
     //init hardware map from XHardwareMap
@@ -39,12 +39,16 @@ public class XTeleop extends OpMode
     @Override
     public void loop() {
         
-        forward = gamepad1.left_stick_y;
-        strafe = gamepad1.left_stick_x;
+        angle = Math.atan2(gamepad1.left_stick_y,gamepad1.left_stick_x);
+        power = Math.pow(Math.pow(gamepad1.left_stick_x,2) + Math.pow(gamepad1.left_stick_y,2),0.5); 
         turn = gamepad1.right_stick_x;
-
-        driver.drive(forward, strafe, turn);
-
+        driver.drive(angle, power, turn);
+        
+        telemetry.addData("angle",angle);
+        if(gamepad1.a){
+            driver.resetIMU();
+        }
+    }
 
     @Override
     public void stop() {

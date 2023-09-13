@@ -1,30 +1,48 @@
 package org.firstinspires.ftc.teamcode;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import java.util.concurrent.TimeUnit;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
 public class XDriver{
     //declaring variables, for tweaking use sensitivity and top speed
     public DcMotor redMotor , blueMotor, greenMotor, yellowMotor;
-
-    double positionPower = 0.7;
-
+    private BHI260IMU imu;
     HardwareMap hwMap = null;
 
-    private ElapsedTime runtime = new ElapsedTime();
-
-    
     public void init( HardwareMap ahwMap ) 
     {
         // Save reference to Hardware map
         HardwareMap hwMap = ahwMap;  
         
+        BHI260IMU.Parameters parameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        new Orientation(
+                                AxesReference.INTRINSIC,
+                                AxesOrder.ZYX,
+                                AngleUnit.RADIANS,
+                                0,
+                                0,
+                                0,
+                                0  // acquisitionTime, not used
+                        )
+                )
+        );
+
+        imu = hwMap.get( BHI260IMU.class, "imu" );
+        imu.initialize( parameters );
+        imu.resetYaw();
+
         redMotor  = hwMap.get(DcMotor.class, "redMotor");
         greenMotor  = hwMap.get(DcMotor.class, "greenMotor");
         yellowMotor = hwMap.get(DcMotor.class, "yellowMotor");
@@ -35,51 +53,31 @@ public class XDriver{
         blueMotor.setDirection(DcMotor.Direction.REVERSE);
         greenMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        yellowMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        redMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        greenMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        blueMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         yellowMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         redMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         greenMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         blueMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
     } 
-        public void drive(double forward, double strafe, double turn){
-            
-            yellowMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            redMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            greenMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            blueMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            double yellowPower = forward - turn;
-            double greenPower = forward + turn;
-            double redPower = strafe - turn;
-            double bluePower = strafe + turn;
+    public double getHeading(){
+        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+    }
+    
+    public void resetIMU(){
+        imu.resetYaw();
+    }
+    
+    public void drive(double angle, double power, double turn){
+
+            double yellowPower = (Math.sin(angle + getHeading()) + Math.cos(angle + getHeading())) * power - turn;
+            double greenPower =  (Math.sin(angle + getHeading()) + Math.cos(angle + getHeading())) * power + turn;
+            double redPower = (Math.sin(angle + Math.PI / 2 + getHeading()) + Math.cos(angle + Math.PI / 2 + getHeading())) * power - turn;
+            double bluePower = (Math.sin(angle + Math.PI / 2 + getHeading()) + Math.cos(angle + Math.PI / 2 + getHeading())) * power + turn;
             blueMotor.setPower(bluePower);
             redMotor.setPower(redPower);
             yellowMotor.setPower(yellowPower);
             greenMotor.setPower(greenPower);
-        }
-
-        public void driveToPosition(int red, int green, int blue, int yellow){
-            redMotor.setTargetPosition(red);
-            greenMotor.setTargetPosition(green);
-            blueMotor.setTargetPosition(blue);
-            yellowMotor.setTargetPosition(yellow);
-
-            yellowMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            redMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            greenMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            blueMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            blueMotor.setPower(positionPower);
-            redMotor.setPower(positionPower);
-            yellowMotor.setPower(positionPower);
-            greenMotor.setPower(positionPower);
-
-
-        }
+    }
         
 }
